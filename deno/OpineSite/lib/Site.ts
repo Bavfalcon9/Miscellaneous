@@ -37,6 +37,9 @@ export interface SiteOptions {
      debug?: boolean;
 }
 
+/**
+ * Router function for middleware folder (if it does not extend a class.)
+ */
 export type MiddleWareFunction = (req: ExtendedRequest, res: Response, next: NextFunction) => void;
 
 class Site {
@@ -65,6 +68,11 @@ class Site {
           }
      }
 
+     /**
+      * Load the site
+      * 
+      * @todo Complete
+      */
      public async load(): Promise<void> {
           if (this.#options.static) {
                for (let dir of this.#options.static) {
@@ -107,6 +115,7 @@ class Site {
                throw new SiteException('You must include a path for routes to be loaded.');
           }
 
+          // todo Complete this.
           for (let dir of this.#options.routes) {
                const path: string = resolve(Deno.cwd(), dir);
                let module: any;

@@ -2,7 +2,6 @@ import { IStore } from "./interface.ts";
 import { connect } from "https://denopkg.com/keroxp/deno-redis/mod.ts";
 
 export default class RedisStore implements IStore {
-	
 	private _sessionRedisStore: any;
 	private _hostname: string;
 	private _port: number;

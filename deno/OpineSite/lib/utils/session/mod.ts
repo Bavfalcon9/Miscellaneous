@@ -24,7 +24,6 @@ interface ISessionOptions {
 }
 
 export class Session {
-	
 	private _frameworkLib: any;
 	private _storeLib: any;
 	private _options: any;

@@ -1,7 +1,6 @@
 import { IStore } from "./interface.ts";
 
 export default class MemoryStore implements IStore {
-	
 	private _sessionMemoryStore: any;
 	
 	constructor(options: any) {
