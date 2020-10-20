@@ -1,61 +1,61 @@
 {
      /** 
       * The port to serve on.
-      * @type number
+      * @type {number}
       */
      "port": 80,
      /** 
       * Whether or not sessions should be allowed.
-      * @type boolean
+      * @type {boolean}
       */
      "sessions": true,
      /** 
       * An array of routes to serve from.
-      * @type string[]
+      * @type {string[]}
       */
      "routes": [
           "./tests"
      ],
      /** 
       * An array of folders that contain middleware functions
-      * @type string[]
+      * @type {string[]}
       */
      "middleware": [
           "./tests"
      ],
      /** 
       * A secret key for redis db (not respected atm)
-      * @type string
+      * @type {string}
       */
      "secret": "",
      /** 
       * The base path of your site
-      * @type string
+      * @type {string}
       */
      "path": "./tests",
      /** 
       * Static files to serve (directories or files)
-      * @type string[]
+      * @type {string[]}
       */
      "static": [],
      /** 
       * Whether or not dot files "." should be allowed for static serves
-      * @type boolean
+      * @type {boolean}
       */
      "dotfiles": true,
      /** 
       * Whether or not an incoming request is proxied to get the ip
-      * @type boolean
+      * @type {boolean}
       */
      "view_ips": true,
      /** 
       * Request cookie options.
-      * @type any
+      * @type {any}
       */
      "cookieOptions": {},
      /** 
       * Whether or not to enable logs
-      * @type boolean
+      * @type {boolean}
       */
      "debug": false
 }
