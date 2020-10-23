@@ -6,18 +6,20 @@ import type {
      NextFunction,
      Response
 } from "https://deno.land/x/opine@0.24.0/src/types.ts";
-import { Server } from "https://deno.land/std@0.69.0/http/server.ts";
+import type { Server } from "https://deno.land/std@0.69.0/http/server.ts";
 import { Session } from "./utils/session/mod.ts";
 import { resolve } from "https://deno.land/std@0.74.0/path/mod.ts";
 import Logger from "./utils/Logger.ts";
 import SiteException from "./errors/SiteException.ts";
+import Route from "./routes/Route.ts";
+import { walk, walkSync } from "https://deno.land/std/fs/walk.ts";
 
 export interface SiteOptions {
      /** Port to host on */
      port: number;
      /** Whether or not sessions should be allowed. */
      sessions: boolean;
-     /** Route method locations */
+     /** Route method folders relative to "path" */
      routes: string[];
      /** Middleware folders */
      middleware?: string[];
@@ -56,16 +58,6 @@ class Site {
           // debug
           Logger.HARD_ENABLE = options.debug || false;
           this.logger = new Logger('OpineSite');
-
-          if (options.sessions) {
-               const session = new Session({ framework: 'opine' });
-               session.init();
-
-               const MW = (options.cookieOptions)
-                    ? session.use()(session)
-                    : session.use()(session, options.cookieOptions);
-               this.app.use(MW);
-          }
      }
 
      /**
@@ -74,9 +66,19 @@ class Site {
       * @todo Complete
       */
      public async load(): Promise<void> {
+          if (this.#options.sessions) {
+               const session = new Session({ framework: 'opine' });
+               await session.init();
+
+               const MW = (this.#options.cookieOptions)
+                    ? session.use()(session)
+                    : session.use()(session, this.#options.cookieOptions);
+               this.app.use(MW);
+          }
+          const PATH: string = this.#options.path || Deno.cwd();
           if (this.#options.static) {
                for (let dir of this.#options.static) {
-                    const staticDir: string = resolve(Deno.cwd(), dir);
+                    const staticDir: string = resolve(PATH, dir);
                     this.app.use(serveStatic(staticDir, { dotfiles: this.#options.dotfiles || 'deny' }));
                     this.logger.info(`[STATIC] Serving files over: "${dir}"`);
                }
@@ -89,7 +91,7 @@ class Site {
 
           if (this.#options.middleware) {
                for (let dir of this.#options.middleware) {
-                    const path: string = resolve(Deno.cwd(), dir);
+                    const path: string = resolve(PATH, dir);
                     let module: any;
 
                     // try importing
@@ -116,18 +118,52 @@ class Site {
           }
 
           // todo Complete this.
-          for (let dir of this.#options.routes) {
-               const path: string = resolve(Deno.cwd(), dir);
-               let module: any;
+          for (let parent of this.#options.routes) {
+               for (let dir of walkSync(resolve(PATH, parent))) {
+                    const path: string = dir.path;
 
-               // try importing
-               try {
-                    module = await import(path);
-               } catch (err) {
-                    this.logger.error(`[ROUTE] Unknown Module: ${path}`);
-                    continue;
+                    if (dir.isDirectory) continue;
+                    if (dir.isSymlink) continue;
+
+                    // We're assuming this is a path
+                    
+                    interface RouterModule {
+                         default?: any;
+                    };
+
+                    let module: RouterModule;
+
+                    // try importing
+                    try {
+                         module = await import(`${path}#${Date.now()}`);
+                    } catch (err) {
+                         this.logger.error(`[ROUTE] Unknown Module: ${path}`);
+                         continue;
+                    }
+
+                    if (!module.default) {
+                         this.logger.warn(`[ROUTE] Failed to load route: ${path} due to no default export`);
+                         continue;
+                    }
+
+                    const route: Route = new module.default();
+
+                    if (!(route instanceof Route)) {
+                         this.logger.warn(`[ROUTE] Failed to load path: "${path}" because the export was not a known route.`);
+                         continue;
+                    }
+
+                    (this.app[route.method] as any)(route.path, route.handleRoute);
+
+                    this.logger.notice(`[ROUTE] Route "${route.constructor.name}" serving over "${route.path}" as "${route.method}"`);
                }
           }
+
+          this.app.listen({ port: this.#options.port });
+     }
+
+     public stop(): void {
+          
      }
 }
 export default Site;

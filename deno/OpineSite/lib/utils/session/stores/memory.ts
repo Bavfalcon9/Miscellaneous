@@ -1,4 +1,4 @@
-import { IStore } from "./interface.ts";
+import type { IStore } from "./interface.ts";
 
 export default class MemoryStore implements IStore {
 	private _sessionMemoryStore: any;

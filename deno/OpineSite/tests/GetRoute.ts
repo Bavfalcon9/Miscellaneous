@@ -1,6 +1,6 @@
-import PUBLIC from "../lib/routes/PUBLIC.ts";
+import { PublicRoute } from "../mod.ts";
 
-class BasicRoute extends PUBLIC {
+class BasicRoute extends PublicRoute {
      public constructor() {
           super('/', 'index.ejs');
      }

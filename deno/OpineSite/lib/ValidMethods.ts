@@ -1,9 +1,9 @@
-export type ValidMethods = "GET"
-     | "HEAD"
-     | "POST"
-     | "PUT"
-     | "DELETE"
-     | "CONNECT"
-     | "OPTIONS"
-     | "TRACE"
-     | "PATCH";
+export type ValidMethods = "get"
+     | "head"
+     | "post"
+     | "put"
+     | "delete"
+     | "connect"
+     | "options"
+     | "trace"
+     | "patch";
